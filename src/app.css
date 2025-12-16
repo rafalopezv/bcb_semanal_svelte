@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	html {
+		@apply bg-light-body dark:bg-dark-body;
+	}
+
+	body {
+		@apply bg-light-body dark:bg-dark-body text-light-titulo dark:text-dark-titulo font-sans;
+	}
+}
+
+@layer utilities {
+	/* Custom scrollbar for tabs */
+	.scrollbar-thin::-webkit-scrollbar {
+		height: 6px;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-track {
+		@apply bg-light-fill dark:bg-dark-fill rounded-full;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb {
+		@apply bg-light-focus-secondary dark:bg-dark-focus-secondary rounded-full;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+		@apply bg-light-focus-primary dark:bg-dark-focus-primary;
+	}
+
+	/* For Firefox */
+	.scrollbar-thin {
+		scrollbar-width: thin;
+		scrollbar-color: theme('colors.light-focus-secondary') theme('colors.light-fill');
+	}
+
+	.dark .scrollbar-thin {
+		scrollbar-color: theme('colors.dark-focus-secondary') theme('colors.dark-fill');
+	}
+}
