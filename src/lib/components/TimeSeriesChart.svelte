@@ -2,10 +2,9 @@
 	import { onMount } from 'svelte';
 	import * as d3 from 'd3';
 
-	let { data = [], isDark = false, title = [] } = $props();
+	let { data = [], isDark = false, title = [], showTitle = true, tooltip = $bindable({ visible: false, x: 0, y: 0, fecha: '', valor: '', unidad: '' }) } = $props();
 
 	let chartContainer;
-	let tooltip = $state({ visible: false, x: 0, y: 0, fecha: '', valor: '', unidad: '' });
 	let isAnimating = $state(false);
 
 	const colors = $derived(
@@ -13,16 +12,16 @@
 			? {
 					frame: '#8a8a8a',
 					background: '#151515',
-					line: '#b89885',
+					line: '#c9a896',
 					fill: '#2a231f',
-					focus_primary: '#c9a896',
+					focus_primary: '#d4b5a3',
 					focus_secondary: '#b0b0b0',
 					border: '#151515'
 				}
 			: {
 					frame: '#bdbdbd',
 					background: '#ffffff',
-					line: '#5a7d5f',
+					line: '#4a6d4f',
 					fill: '#e8f0e9',
 					focus_primary: '#1a1a1a',
 					focus_secondary: '#6b6b6b',
@@ -60,13 +59,19 @@
 			.map(([fecha, valor]) => ({ fecha, valor }))
 			.sort((a, b) => a.fecha - b.fecha);
 
-		// Dimensions
+		// Dimensions - responsive to container size
 		const containerWidth = chartContainer.clientWidth;
+		const containerHeight = chartContainer.clientHeight;
 		const isMobile = containerWidth < 768;
-		const width = isMobile ? containerWidth : Math.min(980, containerWidth);
-		const height = isMobile ? 450 : 650;
+		const width = containerWidth; // Use full container width
+		const height = containerHeight || (isMobile ? 500 : 700); // Use container height or fallback
 
-		const margin = { top: 80, right: 70, bottom: 40, left: 30 };
+		const margin = {
+			top: showTitle ? 80 : 20,
+			right: 70,
+			bottom: 40,
+			left: 30
+		};
 		const innerWidth = width - margin.left - margin.right;
 		const innerHeight = height - margin.top - margin.bottom;
 
@@ -88,29 +93,30 @@
 			.append('svg')
 			.attr('width', width)
 			.attr('height', height)
-			.attr('class', 'rounded border')
-			.style('border-color', colors.border)
+			.attr('class', 'rounded')
 			.style('background-color', colors.background);
 
 		const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
-		// Multi-line title inside chart
-		const titleLines = Array.isArray(title) ? title : [title];
-		const lineHeight = isMobile ? 18 : 20;
-		const baseFontSize = isMobile ? '14px' : '16px';
+		// Multi-line title inside chart (only if showTitle is true)
+		if (showTitle) {
+			const titleLines = Array.isArray(title) ? title : [title];
+			const lineHeight = isMobile ? 18 : 20;
+			const baseFontSize = isMobile ? '14px' : '16px';
 
-		titleLines.forEach((line, i) => {
-			g.append('text')
-				.attr('x', 0)
-				.attr('y', -50 + (i * lineHeight))
-				.attr('text-anchor', 'start')
-				.attr('fill', colors.line)
-				.style('font-size', i === 1 ? (isMobile ? '15px' : '17px') : baseFontSize)
-				.style('font-weight', i === 1 ? 600 : 400)
-				.style('letter-spacing', '-0.01em')
-				.style('opacity', i === 1 ? 1 : 0.85)
-				.text(line);
-		});
+			titleLines.forEach((line, i) => {
+				g.append('text')
+					.attr('x', 0)
+					.attr('y', -50 + i * lineHeight)
+					.attr('text-anchor', 'start')
+					.attr('fill', colors.line)
+					.style('font-size', i === 1 ? (isMobile ? '15px' : '17px') : baseFontSize)
+					.style('font-weight', i === 1 ? 600 : 400)
+					.style('letter-spacing', '-0.01em')
+					.style('opacity', i === 1 ? 1 : 0.85)
+					.text(line);
+			});
+		}
 
 		// Grid
 		g.append('g')
@@ -123,7 +129,7 @@
 			.attr('y1', (d) => yScale(d))
 			.attr('y2', (d) => yScale(d))
 			.attr('stroke', colors.frame)
-			.attr('stroke-opacity', isDark ? 0.35 : 0.25)
+			.attr('stroke-opacity', isDark ? 0.25 : 0.20)
 			.attr('stroke-dasharray', '2 2');
 
 		// Area
@@ -173,7 +179,7 @@
 			.attr('class', 'full-line')
 			.attr('fill', 'none')
 			.attr('stroke', colors.line)
-			.attr('stroke-width', 2)
+			.attr('stroke-width', 2.5)
 			.attr('d', line);
 
 		// Hover line - active portion (from start to hover point)
@@ -182,7 +188,7 @@
 			.attr('class', 'hover-line')
 			.attr('fill', 'none')
 			.attr('stroke', colors.line)
-			.attr('stroke-width', 2)
+			.attr('stroke-width', 2.5)
 			.style('display', 'none');
 
 		// Future line - removed, not shown in the faded area
@@ -225,15 +231,7 @@
 			.style('font-weight', 500)
 			.style('font-size', '14px');
 
-		// Unit label (top right)
-		g.append('text')
-			.attr('x', innerWidth - 5)
-			.attr('y', -10)
-			.attr('text-anchor', 'end')
-			.attr('fill', colors.line)
-			.style('font-size', '13px')
-			.style('font-weight', 600)
-			.text(unidad);
+		// Unit label removed - now shown in tooltip only
 
 		// Drawing animation - simulate hover effect traveling left to right
 		if (isAnimating) {
@@ -284,10 +282,10 @@
 
 		focus
 			.append('circle')
-			.attr('r', 5)
+			.attr('r', 6)
 			.attr('fill', colors.focus_primary)
 			.attr('stroke', colors.line)
-			.attr('stroke-width', 2);
+			.attr('stroke-width', 2.5);
 
 		focus
 			.append('line')
@@ -350,16 +348,30 @@
 						.attr('y1', -yScale(d.valor))
 						.attr('y2', innerHeight - yScale(d.valor));
 
+					// Update tooltip with data only (position is fixed in template)
 					tooltip = {
 						visible: true,
-						x: event.pageX,
-						y: event.pageY,
+						x: 0, // Not used, position is fixed
+						y: 0, // Not used, position is fixed
 						fecha: formatoFecha.format(d.fecha),
 						valor: d.valor.toLocaleString('es-ES'),
 						unidad
 					};
 				}
 			});
+
+		// Show tooltip with last data point on initial render
+		if (serie.length > 0) {
+			const lastDataPoint = serie[serie.length - 1];
+			tooltip = {
+				visible: true,
+				x: 0,
+				y: 0,
+				fecha: formatoFecha.format(lastDataPoint.fecha),
+				valor: lastDataPoint.valor.toLocaleString('es-ES'),
+				unidad
+			};
+		}
 	}
 
 	// Debounced chart update to prevent too many redraws
@@ -388,23 +400,6 @@
 	});
 </script>
 
-<div class="w-full">
-	<div bind:this={chartContainer} class="w-full animate-fadeIn"></div>
-
-	{#if tooltip.visible}
-		<div
-			class="fixed pointer-events-none z-50 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded p-3 shadow-sm"
-			style="left: {tooltip.x + 10}px; top: {tooltip.y - 50}px;"
-		>
-			<div class="text-xs font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60">
-				{tooltip.fecha}
-			</div>
-			<div class="text-xl font-semibold text-light-titulo dark:text-dark-titulo">
-				{tooltip.valor}
-			</div>
-			<div class="text-xs font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60">
-				{tooltip.unidad}
-			</div>
-		</div>
-	{/if}
+<div class="w-full h-full">
+	<div bind:this={chartContainer} class="w-full h-full animate-fadeIn"></div>
 </div>

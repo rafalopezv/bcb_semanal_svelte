@@ -11,7 +11,10 @@
 		isOpen = $bindable(false),
 		onCategoriaChange,
 		onVariableChange,
-		onSubvariableChange
+		onSubvariableChange,
+		onDownload,
+		onExplore,
+		showDownloadMenu = $bindable(false)
 	} = $props();
 
 	let currentTheme = $state('light');
@@ -63,53 +66,92 @@
 
 <!-- Sidebar -->
 <aside
-	class="fixed md:sticky top-0 left-0 h-screen w-80 bg-light-background dark:bg-dark-background border-r border-light-fill dark:border-dark-fill overflow-y-auto z-50 transition-transform duration-300 {isOpen
+	class="fixed md:sticky top-0 left-0 md:top-auto h-screen md:h-full w-80 bg-light-background dark:bg-dark-background md:rounded-lg border-r md:border border-light-fill dark:border-dark-fill md:shadow-sm overflow-y-auto z-50 transition-transform duration-300 {isOpen
 		? 'translate-x-0'
 		: '-translate-x-full'} md:translate-x-0"
 >
 	<div class="p-4">
-		<!-- Mobile Header with Theme Toggle and Close -->
-		<div class="md:hidden flex items-center justify-between mb-6 pb-4 border-b border-light-fill dark:border-dark-fill">
-			<!-- Theme Toggle - Mobile only -->
-			<button
-				onclick={currentToggleTheme}
-				class="p-2 rounded-full hover:bg-light-fill dark:hover:bg-dark-fill transition-colors"
-				aria-label="Toggle theme"
-			>
-				{#if currentTheme === 'light'}
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-						/>
-					</svg>
-				{:else}
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-						/>
-					</svg>
-				{/if}
-			</button>
+		<!-- Mobile Header with Action Buttons and Close -->
+		<div class="md:hidden mb-6 pb-4 border-b border-light-fill dark:border-dark-fill">
+			<!-- Control Panel - Mobile -->
+			<div class="flex items-center justify-between mb-4 pb-4 border-b border-light-fill dark:border-dark-fill">
+				<div class="flex items-center gap-2 flex-1">
+					<!-- Download Button -->
+					<button
+						onclick={onDownload}
+						class="p-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors"
+						title="Descargar datos"
+					>
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+						</svg>
+					</button>
 
-			<!-- Close button -->
-			<button
-				onclick={() => (isOpen = false)}
-				class="p-2 hover:bg-light-fill dark:hover:bg-dark-fill rounded"
-				aria-label="Close menu"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
-			</button>
+					<!-- Explore Button -->
+					<button
+						onclick={onExplore}
+						class="p-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors"
+						title="Explorar datos"
+					>
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+						</svg>
+					</button>
+
+					<!-- Separator -->
+					<div class="w-px h-6 bg-light-fill dark:bg-dark-fill mx-1"></div>
+
+					<!-- Theme Toggle -->
+					<button
+						onclick={currentToggleTheme}
+						class="p-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors"
+						aria-label="Toggle theme"
+					>
+						{#if currentTheme === 'light'}
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+								/>
+							</svg>
+						{:else}
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+								/>
+							</svg>
+						{/if}
+					</button>
+				</div>
+
+				<!-- Close button -->
+				<button
+					onclick={() => (isOpen = false)}
+					class="p-2 hover:bg-light-fill dark:hover:bg-dark-fill rounded"
+					aria-label="Close menu"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
+
+			<!-- Mobile Labels -->
+			<div class="flex gap-2 text-xs font-medium text-light-titulo dark:text-dark-titulo opacity-70">
+				<span>Descargar</span>
+				<span>•</span>
+				<span>Explorar</span>
+				<span>•</span>
+				<span>Tema</span>
+			</div>
 		</div>
 
 		<!-- Hierarchical Navigation -->
@@ -119,7 +161,7 @@
 					<!-- Category Button - NIVEL 1 -->
 					<button
 						onclick={() => selectCategoria(categoria)}
-						class="w-full text-left px-3 py-3 text-base font-semibold rounded transition-colors {selectedCategoria ===
+						class="w-full text-left px-3 py-3 text-base font-display font-semibold rounded transition-colors {selectedCategoria ===
 						categoria
 							? 'bg-light-fill dark:bg-dark-fill text-light-titulo dark:text-dark-titulo'
 							: 'text-light-titulo dark:text-dark-titulo opacity-85 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"

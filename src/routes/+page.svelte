@@ -4,6 +4,7 @@
 	import TimeSeriesChart from '$lib/components/TimeSeriesChart.svelte';
 	import ParquetViewer from '$lib/components/ParquetViewer.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
+	import { themeStore } from '$lib/stores/theme.js';
 
 	let data = $state([]);
 	let dataIndex = $state({}); // NEW: Pre-indexed data for instant lookup
@@ -17,6 +18,18 @@
 	let isDark = $state(false);
 	let showParquetViewer = $state(false);
 	let sidebarOpen = $state(false); // For mobile toggle
+	let currentTheme = $state('light');
+	let currentToggleTheme = $state(() => {});
+	let chartTooltip = $state({ visible: false, x: 0, y: 0, fecha: '', valor: '', unidad: '' });
+
+	// Subscribe to theme store
+	$effect(() => {
+		const unsubscribe = themeStore.subscribe((value) => {
+			currentTheme = value.theme;
+			currentToggleTheme = value.toggleTheme;
+		});
+		return unsubscribe;
+	});
 
 	// Detect dark mode
 	onMount(async () => {
@@ -217,20 +230,127 @@
 	/>
 </svelte:head>
 
-<main class="min-h-screen bg-light-body dark:bg-dark-body">
-	<!-- Header -->
-	<header class="border-b border-light-fill dark:border-dark-fill bg-light-background dark:bg-dark-background">
-		<div class="max-w-[1800px] mx-auto px-4 py-6 flex items-center justify-between">
-			<h1 class="text-2xl md:text-3xl font-normal tracking-tight text-light-titulo dark:text-dark-titulo">
-				<span class="block md:inline">Estadísticas Semanales</span>
+<main class="h-screen flex flex-col bg-light-body dark:bg-dark-body overflow-hidden">
+	<!-- Header - Card with spacing on desktop -->
+	<header class="md:mx-6 md:mt-6 md:rounded-lg border-b md:border border-light-fill dark:border-dark-fill bg-light-background dark:bg-dark-background md:shadow-sm">
+		<div class="px-4 md:px-6 py-6 flex items-center justify-between gap-4">
+			<h1 class="text-2xl md:text-3xl font-display font-normal tracking-tight text-light-titulo dark:text-dark-titulo">
+				<span class="block md:inline">Banco Central de Bolivia</span>
 				<span class="hidden md:inline text-gray-400 dark:text-gray-600 mx-2">•</span>
-				<span class="block md:inline text-lg md:text-3xl opacity-80">Banco Central de Bolivia</span>
+				<span class="block md:inline text-lg md:text-3xl opacity-80">Estadísticas Semanales</span>
 			</h1>
+
+			<!-- Desktop Control Panel - Action buttons + Theme toggle -->
+			<div class="hidden md:flex items-center gap-2 border border-light-fill dark:border-dark-fill rounded-lg p-1">
+				<!-- Download Button with Dropdown -->
+				<div class="relative download-menu-container">
+					<button
+						onclick={toggleDownloadMenu}
+						class="group px-3 py-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2 text-sm"
+						title="Descargar datos en diferentes formatos"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+						</svg>
+						<span>Descargar</span>
+						<svg class="w-3 h-3 transition-transform {showDownloadMenu ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+						</svg>
+					</button>
+
+					<!-- Dropdown Menu -->
+					{#if showDownloadMenu}
+						<div class="absolute top-full mt-2 right-0 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded shadow-sm overflow-hidden z-10 min-w-[280px]">
+							<button
+								onclick={downloadCSV}
+								class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal text-sm"
+							>
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+								</svg>
+								<span>Serie de tiempo CSV</span>
+							</button>
+							<button
+								onclick={downloadXLSX}
+								class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal text-sm"
+							>
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+								</svg>
+								<span>Serie de tiempo XLSX</span>
+							</button>
+							<button
+								onclick={downloadOldFormat}
+								class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal text-sm"
+							>
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+								</svg>
+								<span>Estado semanal clásico XLSX</span>
+							</button>
+							<button
+								onclick={downloadOldFormat}
+								class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal text-sm"
+							>
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+									<path stroke-linecap="round" stroke-linejoin="round" d="M9 10h1m-1 4h1m4-4h1m-1 4h1"/>
+								</svg>
+								<span>Estado semanal clásico PDF</span>
+							</button>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Separator -->
+				<div class="w-px h-6 bg-light-fill dark:bg-dark-fill"></div>
+
+				<!-- View Database Button -->
+				<button
+					onclick={viewDatabase}
+					class="px-3 py-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2 text-sm"
+					title="Explorar base de datos completa en vivo"
+				>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+					</svg>
+					<span>Explorar</span>
+				</button>
+
+				<!-- Separator -->
+				<div class="w-px h-6 bg-light-fill dark:bg-dark-fill"></div>
+
+				<!-- Theme Toggle -->
+				<button
+					onclick={currentToggleTheme}
+					class="p-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors"
+					aria-label="Toggle theme"
+				>
+					{#if currentTheme === 'light'}
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+							/>
+						</svg>
+					{:else}
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+							/>
+						</svg>
+					{/if}
+				</button>
+			</div>
 
 			<!-- Mobile menu toggle -->
 			<button
 				onclick={() => sidebarOpen = !sidebarOpen}
-				class="md:hidden px-3 py-2 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded"
+				class="md:hidden px-3 py-2 bg-light-fill dark:bg-dark-fill rounded"
+				aria-label="Toggle menu"
 			>
 				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -240,12 +360,12 @@
 	</header>
 
 	{#if loading}
-		<div class="flex justify-center items-center min-h-[400px]">
+		<div class="flex justify-center items-center flex-1">
 			<div class="text-xl">Cargando datos...</div>
 		</div>
 	{:else}
-		<!-- Main Layout with Sidebar -->
-		<div class="flex">
+		<!-- Main Layout with Sidebar - Grows to fill available space -->
+		<div class="flex gap-4 md:gap-6 p-4 md:px-6 md:py-6 flex-1 overflow-hidden">
 			<!-- Sidebar Component -->
 			<Sidebar
 				{categorias}
@@ -255,122 +375,84 @@
 				bind:selectedVariable
 				bind:selectedSubvariable
 				bind:isOpen={sidebarOpen}
+				bind:showDownloadMenu
 				onCategoriaChange={handleCategoriaChange}
 				onVariableChange={handleVariableChange}
 				onSubvariableChange={handleSubvariableChange}
+				onDownload={toggleDownloadMenu}
+				onExplore={viewDatabase}
 			/>
 
 			<!-- Main Content Area -->
-			<div class="flex-1 min-w-0">
-				<!-- Chart Section -->
-				<section class="p-4 md:p-8">
-					<TimeSeriesChart data={desagregado} {isDark} title={chartTitle} />
+			<div class="flex-1 min-w-0 flex flex-col overflow-hidden">
+				<!-- Chart Section - Card with breathing room, fills available height -->
+				<section class="bg-light-background dark:bg-dark-background rounded-lg border border-light-fill dark:border-dark-fill shadow-sm p-6 md:p-8 flex-1 flex flex-col overflow-hidden">
+					<!-- Chart Title Header with Tooltip -->
+					<div class="mb-6 flex items-center justify-between gap-6">
+						<div class="flex-1">
+							{#each chartTitle as line, i}
+								<h2
+									class="
+										{i === 0 ? 'text-sm md:text-base opacity-70' : ''}
+										{i === 1 ? 'text-xl md:text-2xl font-display font-semibold mt-1' : ''}
+										{i === 2 ? 'text-base md:text-lg font-medium mt-1 opacity-80' : ''}
+										text-light-titulo dark:text-dark-titulo
+									"
+								>
+									{line}
+								</h2>
+							{/each}
+						</div>
+
+						<!-- Tooltip at title level -->
+						{#if chartTooltip.visible}
+							<div class="pointer-events-none mr-12 md:mr-20 text-right">
+								<div class="text-xs font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60 mb-1">
+									{chartTooltip.fecha}
+								</div>
+								<div class="text-2xl font-semibold text-light-titulo dark:text-dark-titulo mb-1">
+									{chartTooltip.valor}
+								</div>
+								<div class="text-sm font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60">
+									{chartTooltip.unidad}
+								</div>
+							</div>
+						{/if}
+					</div>
+
+					<!-- Chart - fills remaining space -->
+					<div class="flex-1 overflow-hidden">
+						<TimeSeriesChart data={desagregado} {isDark} showTitle={false} bind:tooltip={chartTooltip} />
+					</div>
 				</section>
 
-				<!-- Action Buttons -->
-				<div class="flex justify-center gap-3 px-4 pb-8 relative">
-					<!-- Download Button with Dropdown -->
-					<div class="relative download-menu-container">
-				<button
-					onclick={toggleDownloadMenu}
-					class="group px-5 py-2.5 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2"
-					title="Descargar datos en diferentes formatos"
-				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-					</svg>
-					<span class="hidden sm:inline">Descargar datos</span>
-					<span class="sm:hidden">Descargar</span>
-					<svg class="w-4 h-4 transition-transform {showDownloadMenu ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-					</svg>
-				</button>
-
-				<!-- Dropdown Menu -->
-				{#if showDownloadMenu}
-					<div class="absolute bottom-full mb-2 left-0 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded shadow-sm overflow-hidden z-10 min-w-[280px]">
-						<button
-							onclick={downloadCSV}
-							class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal"
-						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-							</svg>
-							<span>Serie de tiempo CSV</span>
-						</button>
-						<button
-							onclick={downloadXLSX}
-							class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal"
-						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-							</svg>
-							<span>Serie de tiempo XLSX</span>
-						</button>
-						<button
-							onclick={downloadOldFormat}
-							class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal"
-						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-							</svg>
-							<span>Estado semanal clásico XLSX</span>
-						</button>
-						<button
-							onclick={downloadOldFormat}
-							class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal"
-						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h1m-1 4h1m4-4h1m-1 4h1"/>
-							</svg>
-							<span>Estado semanal clásico PDF</span>
-						</button>
-					</div>
-				{/if}
-			</div>
-
-			<!-- View Database Button -->
-			<button
-				onclick={viewDatabase}
-				class="px-5 py-2.5 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2"
-				title="Explorar base de datos completa en vivo"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
-				</svg>
-				<span class="hidden sm:inline">Explorar datos</span>
-				<span class="sm:hidden">Explorar</span>
-			</button>
-				</div>
+				<!-- Footer - inside main content area -->
+				<footer class="text-center text-sm text-gray-600 dark:text-gray-400 py-4">
+					<p class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+						<span>
+							Datos del
+							<a
+								href="https://www.bcb.gob.bo/?q=estad-sticas-semanales"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="underline decoration-dotted underline-offset-2 decoration-1 hover:text-light-focus-primary dark:hover:text-dark-focus-primary"
+							>
+								Banco Central de Bolivia
+							</a>
+						</span>
+						<span class="hidden sm:inline text-gray-400 dark:text-gray-600">•</span>
+						<span>
+							Última actualización: {new Date().toLocaleDateString('es-ES', {
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric'
+							})}
+						</span>
+					</p>
+				</footer>
 			</div>
 		</div>
 	{/if}
-
-	<!-- Footer -->
-	<footer class="text-center text-sm text-gray-600 dark:text-gray-400 mt-8 pb-8">
-		<p class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-			<span>
-				Datos del
-				<a
-					href="https://www.bcb.gob.bo/?q=estad-sticas-semanales"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="underline decoration-dotted underline-offset-2 decoration-1 hover:text-light-focus-primary dark:hover:text-dark-focus-primary"
-				>
-					Banco Central de Bolivia
-				</a>
-			</span>
-			<span class="hidden sm:inline text-gray-400 dark:text-gray-600">•</span>
-			<span>
-				Última actualización: {new Date().toLocaleDateString('es-ES', {
-					year: 'numeric',
-					month: 'long',
-					day: 'numeric'
-				})}
-			</span>
-		</p>
-	</footer>
 </main>
 
 <!-- Parquet Viewer Modal -->

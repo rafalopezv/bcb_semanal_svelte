@@ -6,7 +6,7 @@ export default {
 		extend: {
 			colors: {
 				// Light mode - Scandinavian minimalist palette
-				'light-body': '#fcfcfc',
+				'light-body': '#ececec',
 				'light-frame': '#bdbdbd',
 				'light-background': '#ffffff',
 				'light-line': '#2b2b2b',
@@ -16,7 +16,7 @@ export default {
 				'light-focus-secondary': '#6b6b6b',
 
 				// Dark mode - Deep dark minimalist palette (no blues)
-				'dark-body': '#0a0a0a',
+				'dark-body': '#000000',
 				'dark-frame': '#8a8a8a',
 				'dark-background': '#151515',
 				'dark-line': '#f0f0f0',
@@ -26,7 +26,9 @@ export default {
 				'dark-focus-secondary': '#b0b0b0',
 			},
 			fontFamily: {
+				'display': ['"Playfair Display"', 'serif'],
 				'sans': [
+					'Inter',
 					'-apple-system',
 					'BlinkMacSystemFont',
 					'"Segoe UI"',

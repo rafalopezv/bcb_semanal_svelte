@@ -5,10 +5,16 @@
 @layer base {
 	html {
 		@apply bg-light-body dark:bg-dark-body;
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 	}
 
 	body {
-		@apply bg-light-body dark:bg-dark-body text-light-titulo dark:text-dark-titulo font-sans;
+		@apply bg-light-body dark:bg-dark-body text-light-titulo dark:text-dark-titulo;
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	}
+
+	h1, h2, h3, h4, h5, h6 {
+		font-family: 'Playfair Display', serif;
 	}
 }
 
