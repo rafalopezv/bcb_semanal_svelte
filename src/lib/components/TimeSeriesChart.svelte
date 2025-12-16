@@ -186,7 +186,11 @@
 		// Future line - removed, not shown in the faded area
 
 		// Axes
-		const xAxis = d3.axisBottom(xScale).tickSize(0).tickPadding(10);
+		const xAxis = d3
+			.axisBottom(xScale)
+			.ticks(isMobile ? 4 : 8)
+			.tickSize(0)
+			.tickPadding(10);
 
 		const miles = d3.max(serie, (d) => d.valor) > 1e4;
 		const formatter = miles ? (d) => d / 1e3 : (d) => d;
