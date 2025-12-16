@@ -109,10 +109,19 @@
 					.attr('y', -50 + i * lineHeight)
 					.attr('text-anchor', 'start')
 					.attr('fill', colors.line)
-					.style('font-size', i === 1 ? (isMobile ? '15px' : '17px') : baseFontSize)
-					.style('font-weight', i === 1 ? 600 : 400)
+					.style('font-size',
+						i === 1 ? (isMobile ? '15px' : '17px') :
+						i === 2 ? (isMobile ? '12px' : '14px') :
+						baseFontSize)
+					.style('font-weight',
+						i === 1 ? 600 :
+						i === 2 ? 300 :
+						400)
 					.style('letter-spacing', '-0.01em')
-					.style('opacity', i === 1 ? 1 : 0.85)
+					.style('opacity',
+						i === 1 ? 1 :
+						i === 2 ? 0.65 :
+						0.85)
 					.text(line);
 			});
 		}
@@ -181,6 +190,19 @@
 			.attr('stroke-width', 2.5)
 			.attr('d', line);
 
+		// End point - permanent dot at the last data point
+		if (serie.length > 0) {
+			const lastPoint = serie[serie.length - 1];
+			g.append('circle')
+				.attr('class', 'end-point')
+				.attr('cx', xScale(lastPoint.fecha))
+				.attr('cy', yScale(lastPoint.valor))
+				.attr('r', 6)
+				.attr('fill', colors.focus_primary)
+				.attr('stroke', colors.focus_stroke)
+				.attr('stroke-width', 2.5);
+		}
+
 		// Hover line - active portion (from start to hover point)
 		const hoverLine = g
 			.append('path')
@@ -197,7 +219,7 @@
 			.axisBottom(xScale)
 			.ticks(isMobile ? 4 : 8)
 			.tickSize(0)
-			.tickPadding(22);
+			.tickPadding(isMobile ? 8 : 22);
 
 		const miles = d3.max(serie, (d) => d.valor) > 1e4;
 		const formatter = miles ? (d) => d / 1e3 : (d) => d;
@@ -270,6 +292,7 @@
 				hoverLine.style('display', null);
 				hoverArea.style('display', null);
 				futureArea.style('display', null);
+				g.select('.end-point').style('display', 'none');
 			})
 			.on('mouseout', () => {
 				focus.style('display', 'none');
@@ -279,6 +302,7 @@
 				hoverLine.style('display', 'none');
 				hoverArea.style('display', 'none');
 				futureArea.style('display', 'none');
+				g.select('.end-point').style('display', null);
 			})
 			.on('mousemove', function (event) {
 				const [xPos] = d3.pointer(event);
