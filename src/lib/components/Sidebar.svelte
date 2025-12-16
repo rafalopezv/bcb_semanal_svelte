@@ -1,4 +1,6 @@
 <script>
+	import { themeStore } from '$lib/stores/theme.js';
+
 	let {
 		categorias = [],
 		variables = {},
@@ -11,6 +13,18 @@
 		onVariableChange,
 		onSubvariableChange
 	} = $props();
+
+	let currentTheme = $state('light');
+	let currentToggleTheme = $state(() => {});
+
+	// Subscribe to theme store
+	$effect(() => {
+		const unsubscribe = themeStore.subscribe((value) => {
+			currentTheme = value.theme;
+			currentToggleTheme = value.toggleTheme;
+		});
+		return unsubscribe;
+	});
 
 	// Track expanded categories
 	let expandedCategoria = $state(selectedCategoria);
@@ -54,37 +68,66 @@
 		: '-translate-x-full'} md:translate-x-0"
 >
 	<div class="p-4">
-		<!-- Close button for mobile -->
-		<button
-			onclick={() => (isOpen = false)}
-			class="md:hidden absolute top-4 right-4 p-2 hover:bg-light-fill dark:hover:bg-dark-fill rounded"
-		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M6 18L18 6M6 6l12 12"
-				/>
-			</svg>
-		</button>
+		<!-- Mobile Header with Theme Toggle and Close -->
+		<div class="md:hidden flex items-center justify-between mb-6 pb-4 border-b border-light-fill dark:border-dark-fill">
+			<!-- Theme Toggle - Mobile only -->
+			<button
+				onclick={currentToggleTheme}
+				class="p-2 rounded-full hover:bg-light-fill dark:hover:bg-dark-fill transition-colors"
+				aria-label="Toggle theme"
+			>
+				{#if currentTheme === 'light'}
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+						/>
+					</svg>
+				{:else}
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+						/>
+					</svg>
+				{/if}
+			</button>
+
+			<!-- Close button -->
+			<button
+				onclick={() => (isOpen = false)}
+				class="p-2 hover:bg-light-fill dark:hover:bg-dark-fill rounded"
+				aria-label="Close menu"
+			>
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			</button>
+		</div>
 
 		<!-- Hierarchical Navigation -->
-		<nav class="space-y-1 mt-12 md:mt-0">
+		<nav class="space-y-2">
 			{#each categorias as categoria}
-				<div class="border-b border-light-fill dark:border-dark-fill last:border-0">
-					<!-- Category Button -->
+				<div class="border-b border-light-fill dark:border-dark-fill last:border-0 pb-2">
+					<!-- Category Button - NIVEL 1 -->
 					<button
 						onclick={() => selectCategoria(categoria)}
-						class="w-full text-left px-3 py-2.5 text-sm font-medium rounded transition-colors {selectedCategoria ===
+						class="w-full text-left px-3 py-3 text-base font-semibold rounded transition-colors {selectedCategoria ===
 						categoria
 							? 'bg-light-fill dark:bg-dark-fill text-light-titulo dark:text-dark-titulo'
-							: 'text-light-titulo dark:text-dark-titulo opacity-70 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"
+							: 'text-light-titulo dark:text-dark-titulo opacity-85 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"
 					>
-						<div class="flex items-center justify-between">
-							<span>{categoria}</span>
+						<div class="flex items-center justify-between gap-2">
+							<span class="flex-1 leading-tight">{categoria}</span>
 							<svg
-								class="w-4 h-4 transition-transform {expandedCategoria === categoria
+								class="w-5 h-5 flex-shrink-0 transition-transform {expandedCategoria === categoria
 									? 'rotate-90'
 									: ''}"
 								fill="none"
@@ -94,39 +137,39 @@
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
-									stroke-width="2"
+									stroke-width="2.5"
 									d="M9 5l7 7-7 7"
 								/>
 							</svg>
 						</div>
 					</button>
 
-					<!-- Variables (shown when category is expanded) -->
+					<!-- Variables (shown when category is expanded) - NIVEL 2 -->
 					{#if expandedCategoria === categoria}
-						<div class="ml-4 mt-1 mb-2 space-y-0.5">
+						<div class="ml-3 mt-2 mb-1 space-y-1">
 							{#each variables[categoria] || [] as variable}
 								<div>
 									<!-- Variable Button -->
 									<button
 										onclick={() => selectVariable(variable)}
-										class="w-full text-left px-3 py-2 text-sm rounded transition-colors {selectedVariable ===
+										class="w-full text-left px-3 py-2.5 text-sm font-medium rounded transition-colors {selectedVariable ===
 										variable
-											? 'bg-light-fill dark:bg-dark-fill text-light-titulo dark:text-dark-titulo font-medium'
-											: 'text-light-titulo dark:text-dark-titulo opacity-60 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"
+											? 'bg-light-fill dark:bg-dark-fill text-light-titulo dark:text-dark-titulo'
+											: 'text-light-titulo dark:text-dark-titulo opacity-70 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"
 									>
 										{variable}
 									</button>
 
-									<!-- Subvariables (shown when variable is selected and has subvariables) -->
+									<!-- Subvariables (shown when variable is selected and has subvariables) - NIVEL 3 -->
 									{#if selectedVariable === variable && subvariables[variable]?.length > 0}
-										<div class="ml-4 mt-1 mb-1 space-y-0.5">
+										<div class="ml-3 mt-1.5 mb-1 space-y-0.5">
 											{#each subvariables[variable] as subvariable}
 												<button
 													onclick={() => selectSubvariable(subvariable)}
-													class="w-full text-left px-3 py-1.5 text-xs rounded transition-colors {selectedSubvariable ===
+													class="w-full text-left px-3 py-2 text-xs font-normal rounded transition-colors {selectedSubvariable ===
 													subvariable
-														? 'bg-light-fill dark:bg-dark-fill text-light-titulo dark:text-dark-titulo font-medium'
-														: 'text-light-titulo dark:text-dark-titulo opacity-50 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"
+														? 'bg-light-fill dark:bg-dark-fill text-light-focus-primary dark:text-dark-focus-primary font-medium'
+														: 'text-light-titulo dark:text-dark-titulo opacity-60 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"
 												>
 													{subvariable}
 												</button>

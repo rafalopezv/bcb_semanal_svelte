@@ -1,6 +1,7 @@
 <script>
 	import '../app.css';
 	import { onMount } from 'svelte';
+	import { themeStore } from '$lib/stores/theme.js';
 
 	let { children } = $props();
 
@@ -11,12 +12,16 @@
 		// Read current theme from DOM (already set by app.html script)
 		theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 
+		// Update store with theme and toggle function
+		themeStore.set({ theme, toggleTheme });
+
 		// Listen for system theme changes (only if user hasn't set preference)
 		const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 		const handleChange = (e) => {
 			if (!localStorage.getItem('theme')) {
 				theme = e.matches ? 'dark' : 'light';
 				applyTheme();
+				themeStore.set({ theme, toggleTheme });
 			}
 		};
 		mediaQuery.addEventListener('change', handleChange);
@@ -35,19 +40,20 @@
 		theme = theme === 'light' ? 'dark' : 'light';
 		localStorage.setItem('theme', theme);
 		applyTheme();
+		themeStore.set({ theme, toggleTheme });
 	}
 </script>
 
 <div class="min-h-screen">
-	<!-- Theme Toggle Button -->
-	<div class="fixed top-4 right-4 md:top-6 md:right-6 z-50">
+	<!-- Theme Toggle Button - Desktop only -->
+	<div class="hidden md:block fixed top-6 right-6 z-50">
 		<button
 			onclick={toggleTheme}
 			class="p-2 rounded-full bg-transparent hover:bg-light-fill dark:hover:bg-dark-fill transition-colors opacity-60 hover:opacity-100"
 			aria-label="Toggle theme"
 		>
 			{#if theme === 'light'}
-				<svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -55,7 +61,7 @@
 					/>
 				</svg>
 			{:else}
-				<svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
