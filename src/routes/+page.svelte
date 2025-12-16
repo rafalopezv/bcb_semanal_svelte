@@ -239,11 +239,21 @@
 	<!-- Header - Card with spacing on desktop -->
 	<header class="md:mx-6 md:mt-6 md:rounded-lg border-b md:border border-light-fill dark:border-dark-fill bg-light-background dark:bg-dark-background md:shadow-sm">
 		<div class="px-4 md:px-6 py-6 flex items-center justify-between gap-4">
-			<h1 class="text-2xl md:text-3xl font-display font-normal tracking-tight text-light-titulo dark:text-dark-titulo">
-				<span class="block md:inline">Banco Central de Bolivia</span>
-				<span class="hidden md:inline text-gray-400 dark:text-gray-600 mx-2">•</span>
-				<span class="block md:inline text-lg md:text-3xl opacity-80">Estadísticas Semanales</span>
-			</h1>
+			<div class="flex items-center gap-3 md:gap-4">
+				<!-- BCB Logo -->
+				<img
+					src="/logo.png"
+					alt="Banco Central de Bolivia"
+					class="h-8 md:h-12 w-auto object-contain"
+				/>
+
+				<!-- Title -->
+				<h1 class="text-2xl md:text-3xl font-display font-normal tracking-tight text-light-titulo dark:text-dark-titulo">
+					<span class="block md:inline">Banco Central de Bolivia</span>
+					<span class="hidden md:inline text-gray-400 dark:text-gray-600 mx-2">•</span>
+					<span class="block md:inline text-lg md:text-3xl opacity-80">Estadísticas Semanales</span>
+				</h1>
+			</div>
 
 			<!-- Desktop Control Panel - Action buttons + Theme toggle -->
 			<div class="hidden md:flex items-center gap-2 border border-light-fill dark:border-dark-fill rounded-lg p-1">
@@ -461,6 +471,66 @@
 		</div>
 	{/if}
 </main>
+
+<!-- Mobile Download Menu Modal -->
+{#if showDownloadMenu}
+	<div class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end download-menu-container" onclick={() => (showDownloadMenu = false)}>
+		<div class="w-full bg-light-background dark:bg-dark-background rounded-t-2xl p-6 animate-slideDown download-menu-container" onclick={(e) => e.stopPropagation()}>
+			<div class="flex items-center justify-between mb-4">
+				<h3 class="text-lg font-semibold text-light-titulo dark:text-dark-titulo">Descargar datos</h3>
+				<button
+					onclick={() => (showDownloadMenu = false)}
+					class="p-2 hover:bg-light-fill dark:hover:bg-dark-fill rounded"
+					aria-label="Cerrar"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+					</svg>
+				</button>
+			</div>
+
+			<div class="space-y-2">
+				<button
+					onclick={downloadCSV}
+					class="w-full px-4 py-3 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 rounded"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+					</svg>
+					<span>Serie de tiempo CSV</span>
+				</button>
+				<button
+					onclick={downloadXLSX}
+					class="w-full px-4 py-3 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 rounded"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+					</svg>
+					<span>Serie de tiempo XLSX</span>
+				</button>
+				<button
+					onclick={downloadOldFormat}
+					class="w-full px-4 py-3 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 rounded"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+					</svg>
+					<span>Estado semanal clásico XLSX</span>
+				</button>
+				<button
+					onclick={downloadOldFormat}
+					class="w-full px-4 py-3 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 rounded"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 10h1m-1 4h1m4-4h1m-1 4h1"/>
+					</svg>
+					<span>Estado semanal clásico PDF</span>
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <!-- Parquet Viewer Modal -->
 <ParquetViewer bind:isOpen={showParquetViewer} filteredData={desagregado} title={chartTitle} />

@@ -79,7 +79,7 @@
 					<!-- Download Button -->
 					<button
 						onclick={onDownload}
-						class="p-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors"
+						class="p-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors download-menu-container"
 						title="Descargar datos"
 					>
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
