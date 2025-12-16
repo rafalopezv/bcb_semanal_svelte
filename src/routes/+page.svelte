@@ -3,6 +3,7 @@
 	import * as d3 from 'd3';
 	import TimeSeriesChart from '$lib/components/TimeSeriesChart.svelte';
 	import ParquetViewer from '$lib/components/ParquetViewer.svelte';
+	import Sidebar from '$lib/components/Sidebar.svelte';
 
 	let data = $state([]);
 	let dataIndex = $state({}); // NEW: Pre-indexed data for instant lookup
@@ -15,9 +16,7 @@
 	let loading = $state(true);
 	let isDark = $state(false);
 	let showParquetViewer = $state(false);
-	let showCategoriaMenu = $state(false);
-	let showVariableMenu = $state(false);
-	let showSubvariableMenu = $state(false);
+	let sidebarOpen = $state(false); // For mobile toggle
 
 	// Detect dark mode
 	onMount(async () => {
@@ -193,49 +192,17 @@
 		showParquetViewer = true;
 	}
 
-	function toggleCategoriaMenu() {
-		showCategoriaMenu = !showCategoriaMenu;
-		showVariableMenu = false;
-		showSubvariableMenu = false;
-	}
-
-	function toggleVariableMenu() {
-		if (!hasVariables) return;
-		showVariableMenu = !showVariableMenu;
-		showCategoriaMenu = false;
-		showSubvariableMenu = false;
-	}
-
-	function toggleSubvariableMenu() {
-		if (!isSubvariableEnabled) return;
-		showSubvariableMenu = !showSubvariableMenu;
-		showCategoriaMenu = false;
-		showVariableMenu = false;
-	}
-
-	// Close dropdowns when clicking outside
+	// Close download dropdown when clicking outside
 	$effect(() => {
 		function handleClickOutside(event) {
 			const isDownloadMenu = event.target.closest('.download-menu-container');
-			const isCategoriaMenu = event.target.closest('.categoria-menu-container');
-			const isVariableMenu = event.target.closest('.variable-menu-container');
-			const isSubvariableMenu = event.target.closest('.subvariable-menu-container');
 
 			if (showDownloadMenu && !isDownloadMenu) {
 				showDownloadMenu = false;
 			}
-			if (showCategoriaMenu && !isCategoriaMenu) {
-				showCategoriaMenu = false;
-			}
-			if (showVariableMenu && !isVariableMenu) {
-				showVariableMenu = false;
-			}
-			if (showSubvariableMenu && !isSubvariableMenu) {
-				showSubvariableMenu = false;
-			}
 		}
 
-		if (showDownloadMenu || showCategoriaMenu || showVariableMenu || showSubvariableMenu) {
+		if (showDownloadMenu) {
 			document.addEventListener('click', handleClickOutside);
 			return () => document.removeEventListener('click', handleClickOutside);
 		}
@@ -250,16 +217,26 @@
 	/>
 </svelte:head>
 
-<main class="max-w-7xl mx-auto px-4 py-8">
+<main class="min-h-screen bg-light-body dark:bg-dark-body">
 	<!-- Header -->
-	<header class="text-center mb-8 pr-8 md:pr-0">
-		<h1
-			class="text-3xl md:text-4xl font-normal tracking-tight text-light-titulo dark:text-dark-titulo flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3"
-		>
-			<span>Estadísticas Semanales</span>
-			<span class="hidden md:inline text-gray-400 dark:text-gray-600">•</span>
-			<span>Banco Central de Bolivia</span>
-		</h1>
+	<header class="border-b border-light-fill dark:border-dark-fill bg-light-background dark:bg-dark-background">
+		<div class="max-w-[1800px] mx-auto px-4 py-6 flex items-center justify-between">
+			<h1 class="text-2xl md:text-3xl font-normal tracking-tight text-light-titulo dark:text-dark-titulo">
+				<span class="block md:inline">Estadísticas Semanales</span>
+				<span class="hidden md:inline text-gray-400 dark:text-gray-600 mx-2">•</span>
+				<span class="block md:inline text-lg md:text-3xl opacity-80">Banco Central de Bolivia</span>
+			</h1>
+
+			<!-- Mobile menu toggle -->
+			<button
+				onclick={() => sidebarOpen = !sidebarOpen}
+				class="md:hidden px-3 py-2 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded"
+			>
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+				</svg>
+			</button>
+		</div>
 	</header>
 
 	{#if loading}
@@ -267,115 +244,33 @@
 			<div class="text-xl">Cargando datos...</div>
 		</div>
 	{:else}
-		<!-- Selection Controls - Compact Button Style -->
-		<div class="max-w-5xl mx-auto mb-8">
-			<div class="flex flex-wrap justify-center gap-3">
-				<!-- Category Dropdown -->
-				<div class="relative categoria-menu-container">
-					<button
-						onclick={toggleCategoriaMenu}
-						class="px-4 py-2.5 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2 text-sm"
-					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-						</svg>
-						<span>Categoría</span>
-						<svg class="w-4 h-4 transition-transform {showCategoriaMenu ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-						</svg>
-					</button>
+		<!-- Main Layout with Sidebar -->
+		<div class="flex">
+			<!-- Sidebar Component -->
+			<Sidebar
+				{categorias}
+				{variables}
+				{subvariables}
+				bind:selectedCategoria
+				bind:selectedVariable
+				bind:selectedSubvariable
+				bind:isOpen={sidebarOpen}
+				onCategoriaChange={handleCategoriaChange}
+				onVariableChange={handleVariableChange}
+				onSubvariableChange={handleSubvariableChange}
+			/>
 
-					{#if showCategoriaMenu}
-						<div class="absolute top-full mt-2 left-0 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded shadow-sm overflow-hidden z-10 min-w-[250px] max-h-[400px] overflow-y-auto">
-							{#each categorias as categoria}
-								<button
-									onclick={() => handleCategoriaChange(categoria)}
-									class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal text-sm {selectedCategoria === categoria ? 'bg-light-fill dark:bg-dark-fill' : ''}"
-								>
-									{categoria}
-								</button>
-							{/each}
-						</div>
-					{/if}
-				</div>
+			<!-- Main Content Area -->
+			<div class="flex-1 min-w-0">
+				<!-- Chart Section -->
+				<section class="p-4 md:p-8">
+					<TimeSeriesChart data={desagregado} {isDark} title={chartTitle} />
+				</section>
 
-				<!-- Variable Dropdown -->
-				<div class="relative variable-menu-container">
-					<button
-						onclick={toggleVariableMenu}
-						disabled={!hasVariables}
-						class="px-4 py-2.5 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-						</svg>
-						<span>Variable</span>
-						<svg class="w-4 h-4 transition-transform {showVariableMenu ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-						</svg>
-					</button>
-
-					{#if showVariableMenu}
-						<div class="absolute top-full mt-2 left-0 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded shadow-sm overflow-hidden z-10 min-w-[250px] max-h-[400px] overflow-y-auto">
-							{#each variables[selectedCategoria] || [] as variable}
-								<button
-									onclick={() => handleVariableChange(variable)}
-									class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal text-sm {selectedVariable === variable ? 'bg-light-fill dark:bg-dark-fill' : ''}"
-								>
-									{variable}
-								</button>
-							{/each}
-						</div>
-					{/if}
-				</div>
-
-				<!-- Subvariable Dropdown -->
-				<div class="relative subvariable-menu-container">
-					<button
-						onclick={toggleSubvariableMenu}
-						disabled={!isSubvariableEnabled}
-						class="px-4 py-2.5 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-						</svg>
-						<span>Subvariable</span>
-						<svg class="w-4 h-4 transition-transform {showSubvariableMenu ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-						</svg>
-					</button>
-
-					{#if showSubvariableMenu}
-						<div class="absolute top-full mt-2 left-0 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded shadow-sm overflow-hidden z-10 min-w-[250px] max-h-[400px] overflow-y-auto">
-							{#if currentSubvariables.length === 0}
-								<div class="px-4 py-2.5 text-sm opacity-50">N/A</div>
-							{:else}
-								{#each currentSubvariables as subvariable}
-									<button
-										onclick={() => handleSubvariableChange(subvariable)}
-										class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal text-sm {selectedSubvariable === subvariable ? 'bg-light-fill dark:bg-dark-fill' : ''}"
-									>
-										{subvariable}
-									</button>
-								{/each}
-							{/if}
-						</div>
-					{/if}
-				</div>
-			</div>
-		</div>
-
-		<!-- Chart Section -->
-		<section class="mb-6">
-			<div class="max-w-5xl mx-auto w-full">
-				<TimeSeriesChart data={desagregado} {isDark} title={chartTitle} />
-			</div>
-		</section>
-
-		<!-- Action Buttons -->
-		<div class="flex justify-center gap-3 mb-12 relative">
-			<!-- Download Button with Dropdown -->
-			<div class="relative download-menu-container">
+				<!-- Action Buttons -->
+				<div class="flex justify-center gap-3 px-4 pb-8 relative">
+					<!-- Download Button with Dropdown -->
+					<div class="relative download-menu-container">
 				<button
 					onclick={toggleDownloadMenu}
 					class="group px-5 py-2.5 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2"
@@ -447,6 +342,8 @@
 				<span class="hidden sm:inline">Explorar datos</span>
 				<span class="sm:hidden">Explorar</span>
 			</button>
+				</div>
+			</div>
 		</div>
 	{/if}
 

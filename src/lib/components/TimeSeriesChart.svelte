@@ -11,12 +11,13 @@
 	const colors = $derived(
 		isDark
 			? {
-					frame: '#60789d',
-					background: '#15202c',
-					line: '#78c2f6',
-					fill: '#324d69',
-					focus_primary: '#1c9af1',
-					focus_secondary: '#87a5c5'
+					frame: '#8a8a8a',
+					background: '#151515',
+					line: '#b89885',
+					fill: '#2a231f',
+					focus_primary: '#c9a896',
+					focus_secondary: '#b0b0b0',
+					border: '#151515'
 				}
 			: {
 					frame: '#bdbdbd',
@@ -24,7 +25,8 @@
 					line: '#5a7d5f',
 					fill: '#e8f0e9',
 					focus_primary: '#1a1a1a',
-					focus_secondary: '#6b6b6b'
+					focus_secondary: '#6b6b6b',
+					border: '#e8f0e9'
 				}
 	);
 
@@ -87,7 +89,7 @@
 			.attr('width', width)
 			.attr('height', height)
 			.attr('class', 'rounded border')
-			.style('border-color', colors.fill)
+			.style('border-color', colors.border)
 			.style('background-color', colors.background);
 
 		const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
