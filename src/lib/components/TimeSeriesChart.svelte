@@ -13,19 +13,21 @@
 					frame: '#8a8a8a',
 					background: '#151515',
 					line: '#c9a896',
-					fill: '#2a231f',
-					focus_primary: '#d4b5a3',
+					fill: '#4a3a30',
+					focus_primary: '#d4a574',      // Ámbar dorado vibrante (círculo hover)
 					focus_secondary: '#b0b0b0',
+					focus_stroke: '#c9a896',       // Ámbar suave (borde círculo)
 					border: '#151515'
 				}
 			: {
-					frame: '#bdbdbd',
+					frame: '#8a8a8a',
 					background: '#ffffff',
-					line: '#4a6d4f',
-					fill: '#e8f0e9',
-					focus_primary: '#1a1a1a',
+					line: '#2d4a52',
+					fill: '#d3d8da',
+					focus_primary: '#4a8896',      // Teal vibrante (círculo hover)
 					focus_secondary: '#6b6b6b',
-					border: '#e8f0e9'
+					focus_stroke: '#2d4a52',       // Teal oscuro (borde círculo)
+					border: '#d3d8da'
 				}
 	);
 
@@ -43,9 +45,6 @@
 
 		// Clear previous chart
 		d3.select(chartContainer).selectAll('*').remove();
-
-		// Trigger drawing animation
-		isAnimating = true;
 
 		const unidad = data[0]?.unidad || '';
 
@@ -68,9 +67,9 @@
 
 		const margin = {
 			top: showTitle ? 80 : 20,
-			right: 70,
-			bottom: 40,
-			left: 30
+			right: isMobile ? 50 : 70,
+			bottom: isMobile ? 30 : 40,
+			left: isMobile ? 10 : 30
 		};
 		const innerWidth = width - margin.left - margin.right;
 		const innerHeight = height - margin.top - margin.bottom;
@@ -129,7 +128,7 @@
 			.attr('y1', (d) => yScale(d))
 			.attr('y2', (d) => yScale(d))
 			.attr('stroke', colors.frame)
-			.attr('stroke-opacity', isDark ? 0.25 : 0.20)
+			.attr('stroke-opacity', isDark ? 0.4 : 0.35)
 			.attr('stroke-dasharray', '2 2');
 
 		// Area
@@ -154,7 +153,7 @@
 			.append('path')
 			.attr('class', 'hover-area')
 			.attr('fill', colors.fill)
-			.attr('fill-opacity', 0.5)
+			.attr('fill-opacity', 0.65)
 			.style('display', 'none');
 
 		// Future area - faded portion (from hover point to end)
@@ -162,7 +161,7 @@
 			.append('path')
 			.attr('class', 'future-area')
 			.attr('fill', colors.fill)
-			.attr('fill-opacity', 0.30)
+			.attr('fill-opacity', 0.20)
 			.style('display', 'none');
 
 		// Line
@@ -198,7 +197,7 @@
 			.axisBottom(xScale)
 			.ticks(isMobile ? 4 : 8)
 			.tickSize(0)
-			.tickPadding(10);
+			.tickPadding(22);
 
 		const miles = d3.max(serie, (d) => d.valor) > 1e4;
 		const formatter = miles ? (d) => d / 1e3 : (d) => d;
@@ -207,7 +206,7 @@
 		const yAxis = d3
 			.axisRight(yScale)
 			.tickSize(0)
-			.tickPadding(10)
+			.tickPadding(16)
 			.tickFormat((d, i, nodes) => {
 				if (i === nodes.length - 1) return `${formatter(d)} ${suffix}`;
 				if (d === 0) return '';
@@ -233,48 +232,6 @@
 
 		// Unit label removed - now shown in tooltip only
 
-		// Drawing animation - simulate hover effect traveling left to right
-		if (isAnimating) {
-			const animationDuration = 1200; // 1.2 seconds
-			const steps = 60; // 60 frames
-			const stepDuration = animationDuration / steps;
-
-			let currentStep = 0;
-
-			const animationInterval = setInterval(() => {
-				if (currentStep >= steps) {
-					clearInterval(animationInterval);
-					isAnimating = false;
-					// Reset to full view
-					fullLine.style('display', null);
-					fullArea.style('display', null);
-					hoverLine.style('display', 'none');
-					hoverArea.style('display', 'none');
-					futureArea.style('display', 'none');
-					return;
-				}
-
-				const progress = currentStep / steps;
-				const targetIndex = Math.floor(progress * serie.length);
-
-				if (targetIndex > 0 && targetIndex < serie.length) {
-					const pastData = serie.slice(0, targetIndex + 1);
-					const futureData = serie.slice(targetIndex);
-
-					// Hide full line/area during animation
-					fullLine.style('display', 'none');
-					fullArea.style('display', 'none');
-
-					// Show animated portions
-					hoverLine.style('display', null).datum(pastData).attr('d', line);
-					hoverArea.style('display', null).datum(pastData).attr('d', area);
-					futureArea.style('display', null).datum(futureData).attr('d', area);
-				}
-
-				currentStep++;
-			}, stepDuration);
-		}
-
 		// Interactive overlay
 		const bisect = d3.bisector((d) => d.fecha).left;
 
@@ -284,7 +241,7 @@
 			.append('circle')
 			.attr('r', 6)
 			.attr('fill', colors.focus_primary)
-			.attr('stroke', colors.line)
+			.attr('stroke', colors.focus_stroke)
 			.attr('stroke-width', 2.5);
 
 		focus

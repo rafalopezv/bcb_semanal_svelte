@@ -66,9 +66,9 @@
 
 <!-- Sidebar -->
 <aside
-	class="fixed md:sticky top-0 left-0 md:top-auto h-screen md:h-full w-80 bg-light-background dark:bg-dark-background md:rounded-lg border-r md:border border-light-fill dark:border-dark-fill md:shadow-sm overflow-y-auto z-50 transition-transform duration-300 {isOpen
+	class="fixed md:sticky top-0 right-0 md:right-auto md:left-0 md:top-auto h-screen md:h-full w-80 bg-light-background dark:bg-dark-background md:rounded-lg border-l md:border border-light-fill dark:border-dark-fill md:shadow-sm overflow-y-auto z-50 transition-transform duration-300 {isOpen
 		? 'translate-x-0'
-		: '-translate-x-full'} md:translate-x-0"
+		: 'translate-x-full'} md:translate-x-0"
 >
 	<div class="p-4">
 		<!-- Mobile Header with Action Buttons and Close -->
@@ -161,10 +161,10 @@
 					<!-- Category Button - NIVEL 1 -->
 					<button
 						onclick={() => selectCategoria(categoria)}
-						class="w-full text-left px-3 py-3 text-base font-display font-semibold rounded transition-colors {selectedCategoria ===
+						class="w-full text-left px-3 py-3 text-base font-semibold rounded transition-colors {selectedCategoria ===
 						categoria
-							? 'bg-light-fill dark:bg-dark-fill text-light-titulo dark:text-dark-titulo'
-							: 'text-light-titulo dark:text-dark-titulo opacity-85 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"
+							? 'bg-light-accent-soft dark:bg-dark-accent-soft text-light-accent-dark dark:text-dark-accent-dark'
+							: 'text-light-titulo dark:text-dark-titulo opacity-85 hover:opacity-100 hover:bg-light-accent-soft/40 dark:hover:bg-dark-accent-soft/60'}"
 					>
 						<div class="flex items-center justify-between gap-2">
 							<span class="flex-1 leading-tight">{categoria}</span>
@@ -196,8 +196,8 @@
 										onclick={() => selectVariable(variable)}
 										class="w-full text-left px-3 py-2.5 text-sm font-medium rounded transition-colors {selectedVariable ===
 										variable
-											? 'bg-light-fill dark:bg-dark-fill text-light-titulo dark:text-dark-titulo'
-											: 'text-light-titulo dark:text-dark-titulo opacity-70 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"
+											? 'bg-light-accent-soft dark:bg-dark-accent-soft text-light-accent-dark dark:text-dark-accent-dark'
+											: 'text-light-titulo dark:text-dark-titulo opacity-70 hover:opacity-100 hover:bg-light-accent-soft/40 dark:hover:bg-dark-accent-soft/60'}"
 									>
 										{variable}
 									</button>
@@ -210,8 +210,8 @@
 													onclick={() => selectSubvariable(subvariable)}
 													class="w-full text-left px-3 py-2 text-xs font-normal rounded transition-colors {selectedSubvariable ===
 													subvariable
-														? 'bg-light-fill dark:bg-dark-fill text-light-focus-primary dark:text-dark-focus-primary font-medium'
-														: 'text-light-titulo dark:text-dark-titulo opacity-60 hover:opacity-100 hover:bg-light-fill dark:hover:bg-dark-fill'}"
+														? 'bg-light-accent-soft dark:bg-dark-accent-soft text-light-accent-dark dark:text-dark-accent-dark font-medium'
+														: 'text-light-titulo dark:text-dark-titulo opacity-60 hover:opacity-100 hover:bg-light-accent-soft/40 dark:hover:bg-dark-accent-soft/60'}"
 												>
 													{subvariable}
 												</button>

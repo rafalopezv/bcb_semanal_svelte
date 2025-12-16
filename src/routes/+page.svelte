@@ -21,6 +21,7 @@
 	let currentTheme = $state('light');
 	let currentToggleTheme = $state(() => {});
 	let chartTooltip = $state({ visible: false, x: 0, y: 0, fecha: '', valor: '', unidad: '' });
+	let lastDataDate = $state(null);
 
 	// Subscribe to theme store
 	$effect(() => {
@@ -86,6 +87,10 @@
 			if (subvariables[selectedVariable]?.length > 0) {
 				selectedSubvariable = subvariables[selectedVariable][0];
 			}
+
+			// Calculate last data date
+			const allDates = data.map((d) => new Date(d.fecha));
+			lastDataDate = d3.max(allDates);
 
 			loading = false;
 		} catch (error) {
@@ -246,7 +251,7 @@
 				<div class="relative download-menu-container">
 					<button
 						onclick={toggleDownloadMenu}
-						class="group px-3 py-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2 text-sm"
+						class="group px-3 py-2 rounded border border-transparent hover:border-light-accent dark:hover:border-dark-accent hover:bg-light-accent-soft/60 dark:hover:bg-dark-accent-soft/60 transition-colors font-normal flex items-center gap-2 text-sm"
 						title="Descargar datos en diferentes formatos"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -308,7 +313,7 @@
 				<!-- View Database Button -->
 				<button
 					onclick={viewDatabase}
-					class="px-3 py-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors font-normal flex items-center gap-2 text-sm"
+					class="px-3 py-2 rounded border border-transparent hover:border-light-accent dark:hover:border-dark-accent hover:bg-light-accent-soft/60 dark:hover:bg-dark-accent-soft/60 transition-colors font-normal flex items-center gap-2 text-sm"
 					title="Explorar base de datos completa en vivo"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -323,7 +328,7 @@
 				<!-- Theme Toggle -->
 				<button
 					onclick={currentToggleTheme}
-					class="p-2 rounded hover:bg-light-fill dark:hover:bg-dark-fill transition-colors"
+					class="p-2 rounded border border-transparent hover:border-light-accent dark:hover:border-dark-accent hover:bg-light-accent-soft/60 dark:hover:bg-dark-accent-soft/60 transition-colors"
 					aria-label="Toggle theme"
 				>
 					{#if currentTheme === 'light'}
@@ -365,7 +370,7 @@
 		</div>
 	{:else}
 		<!-- Main Layout with Sidebar - Grows to fill available space -->
-		<div class="flex gap-4 md:gap-6 p-4 md:px-6 md:py-6 flex-1 overflow-hidden">
+		<div class="flex md:gap-6 p-2 md:px-6 md:py-6 flex-1 overflow-hidden">
 			<!-- Sidebar Component -->
 			<Sidebar
 				{categorias}
@@ -386,16 +391,16 @@
 			<!-- Main Content Area -->
 			<div class="flex-1 min-w-0 flex flex-col overflow-hidden">
 				<!-- Chart Section - Card with breathing room, fills available height -->
-				<section class="bg-light-background dark:bg-dark-background rounded-lg border border-light-fill dark:border-dark-fill shadow-sm p-6 md:p-8 flex-1 flex flex-col overflow-hidden">
+				<section class="bg-light-background dark:bg-dark-background rounded-lg border border-light-fill dark:border-dark-fill shadow-sm p-3 md:p-8 flex-1 flex flex-col overflow-hidden">
 					<!-- Chart Title Header with Tooltip -->
-					<div class="mb-6 flex items-center justify-between gap-6">
+					<div class="mb-3 md:mb-6 flex items-center justify-between gap-6">
 						<div class="flex-1">
 							{#each chartTitle as line, i}
 								<h2
 									class="
-										{i === 0 ? 'text-sm md:text-base opacity-70' : ''}
-										{i === 1 ? 'text-xl md:text-2xl font-display font-semibold mt-1' : ''}
-										{i === 2 ? 'text-base md:text-lg font-medium mt-1 opacity-80' : ''}
+										{i === 0 ? 'text-xs md:text-base opacity-70' : ''}
+										{i === 1 ? 'text-base md:text-2xl font-display font-semibold mt-0.5 md:mt-1' : ''}
+										{i === 2 ? 'text-sm md:text-lg font-medium mt-0.5 md:mt-1 opacity-80' : ''}
 										text-light-titulo dark:text-dark-titulo
 									"
 								>
@@ -406,14 +411,14 @@
 
 						<!-- Tooltip at title level -->
 						{#if chartTooltip.visible}
-							<div class="pointer-events-none mr-12 md:mr-20 text-right">
-								<div class="text-xs font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60 mb-1">
+							<div class="pointer-events-none mr-8 md:mr-20 text-right">
+								<div class="text-[10px] md:text-xs font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60 mb-0.5 md:mb-1">
 									{chartTooltip.fecha}
 								</div>
-								<div class="text-2xl font-semibold text-light-titulo dark:text-dark-titulo mb-1">
+								<div class="text-base md:text-2xl font-semibold text-light-accent-bronze dark:text-dark-accent-bronze mb-0.5 md:mb-1">
 									{chartTooltip.valor}
 								</div>
-								<div class="text-sm font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60">
+								<div class="text-xs md:text-sm font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60">
 									{chartTooltip.unidad}
 								</div>
 							</div>
@@ -424,10 +429,8 @@
 					<div class="flex-1 overflow-hidden">
 						<TimeSeriesChart data={desagregado} {isDark} showTitle={false} bind:tooltip={chartTooltip} />
 					</div>
-				</section>
-
-				<!-- Footer - inside main content area -->
-				<footer class="text-center text-sm text-gray-600 dark:text-gray-400 py-4">
+					<!-- Footer - inside chart section -->
+					<footer class="text-center text-sm text-gray-600 dark:text-gray-400 pt-4">
 					<p class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
 						<span>
 							Datos del
@@ -435,22 +438,26 @@
 								href="https://www.bcb.gob.bo/?q=estad-sticas-semanales"
 								target="_blank"
 								rel="noopener noreferrer"
-								class="underline decoration-dotted underline-offset-2 decoration-1 hover:text-light-focus-primary dark:hover:text-dark-focus-primary"
+								class="underline decoration-dotted underline-offset-2 decoration-1 hover:text-light-accent dark:hover:text-dark-accent"
 							>
 								Banco Central de Bolivia
 							</a>
 						</span>
 						<span class="hidden sm:inline text-gray-400 dark:text-gray-600">•</span>
 						<span>
-							Última actualización: {new Date().toLocaleDateString('es-ES', {
-								year: 'numeric',
-								month: 'long',
-								day: 'numeric'
-							})}
+							Última actualización: {lastDataDate
+								? lastDataDate.toLocaleDateString('es-ES', {
+										year: 'numeric',
+										month: 'long',
+										day: 'numeric',
+										timeZone: 'UTC'
+									})
+								: '...'}
 						</span>
 					</p>
 				</footer>
-			</div>
+			</section>
+		</div>
 		</div>
 	{/if}
 </main>
