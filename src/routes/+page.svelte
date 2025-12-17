@@ -178,17 +178,11 @@
 	let showDownloadMenu = $state(false);
 
 	// Download functions
-	function downloadCSV() {
+	function downloadSeriesTiempo() {
 		const a = document.createElement('a');
-		a.href = '/serie_tiempo_csv.zip';
-		a.download = 'serie_tiempo_csv.zip';
+		a.href = '/serie_tiempo.zip';
+		a.download = 'serie_tiempo.zip';
 		a.click();
-		showDownloadMenu = false;
-	}
-
-	function downloadXLSX() {
-		// TODO: Implement XLSX download
-		console.log('XLSX download - to be implemented');
 		showDownloadMenu = false;
 	}
 
@@ -275,22 +269,13 @@
 					{#if showDownloadMenu}
 						<div class="absolute top-full mt-2 right-0 bg-light-background dark:bg-dark-background border border-light-fill dark:border-dark-fill rounded shadow-sm overflow-hidden z-10 min-w-[280px]">
 							<button
-								onclick={downloadCSV}
+								onclick={downloadSeriesTiempo}
 								class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal text-sm"
 							>
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
 								</svg>
-								<span>Serie de tiempo CSV</span>
-							</button>
-							<button
-								onclick={downloadXLSX}
-								class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal text-sm"
-							>
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-								</svg>
-								<span>Serie de tiempo XLSX</span>
+								<span>Serie de tiempo (CSV y Excel)</span>
 							</button>
 							<button
 								onclick={downloadOldFormat}
@@ -299,7 +284,7 @@
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
 								</svg>
-								<span>Estado semanal clásico XLSX</span>
+								<span>Estado semanal clásico</span>
 							</button>
 						</div>
 					{/if}
@@ -479,22 +464,13 @@
 
 			<div class="space-y-2">
 				<button
-					onclick={downloadCSV}
+					onclick={downloadSeriesTiempo}
 					class="w-full px-4 py-3 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 rounded"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
 					</svg>
-					<span>Serie de tiempo CSV</span>
-				</button>
-				<button
-					onclick={downloadXLSX}
-					class="w-full px-4 py-3 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 rounded"
-				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-					</svg>
-					<span>Serie de tiempo XLSX</span>
+					<span>Serie de tiempo (CSV y Excel)</span>
 				</button>
 				<button
 					onclick={downloadOldFormat}
@@ -503,7 +479,7 @@
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
 					</svg>
-					<span>Estado semanal clásico XLSX</span>
+					<span>Estado semanal clásico</span>
 				</button>
 			</div>
 		</div>
