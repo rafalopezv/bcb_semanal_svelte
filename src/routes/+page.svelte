@@ -179,14 +179,10 @@
 
 	// Download functions
 	function downloadCSV() {
-		const csv = d3.csvFormat(desagregado);
-		const blob = new Blob([csv], { type: 'text/csv' });
-		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
-		a.href = url;
-		a.download = 'data.csv';
+		a.href = '/serie_tiempo_csv.zip';
+		a.download = 'serie_tiempo_csv.zip';
 		a.click();
-		URL.revokeObjectURL(url);
 		showDownloadMenu = false;
 	}
 
@@ -197,8 +193,10 @@
 	}
 
 	function downloadOldFormat() {
-		// TODO: Implement old format download
-		console.log('Old format download - to be implemented');
+		const a = document.createElement('a');
+		a.href = '/Semanal 2_2025.xlsx';
+		a.download = 'Semanal 2_2025.xlsx';
+		a.click();
 		showDownloadMenu = false;
 	}
 
@@ -267,7 +265,7 @@
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
 						</svg>
-						<span>Descargar</span>
+						<span>Descargas</span>
 						<svg class="w-3 h-3 transition-transform {showDownloadMenu ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
 						</svg>
@@ -302,16 +300,6 @@
 									<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
 								</svg>
 								<span>Estado semanal clásico XLSX</span>
-							</button>
-							<button
-								onclick={downloadOldFormat}
-								class="w-full px-4 py-2.5 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 font-normal text-sm"
-							>
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-									<path stroke-linecap="round" stroke-linejoin="round" d="M9 10h1m-1 4h1m4-4h1m-1 4h1"/>
-								</svg>
-								<span>Estado semanal clásico PDF</span>
 							</button>
 						</div>
 					{/if}
@@ -516,16 +504,6 @@
 						<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
 					</svg>
 					<span>Estado semanal clásico XLSX</span>
-				</button>
-				<button
-					onclick={downloadOldFormat}
-					class="w-full px-4 py-3 text-left hover:bg-light-fill dark:hover:bg-dark-fill transition-colors flex items-center gap-3 rounded"
-				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-						<path stroke-linecap="round" stroke-linejoin="round" d="M9 10h1m-1 4h1m4-4h1m-1 4h1"/>
-					</svg>
-					<span>Estado semanal clásico PDF</span>
 				</button>
 			</div>
 		</div>
