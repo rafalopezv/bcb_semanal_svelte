@@ -335,7 +335,7 @@
 						x: 0, // Not used, position is fixed
 						y: 0, // Not used, position is fixed
 						fecha: formatoFecha.format(d.fecha),
-						valor: d.valor.toLocaleString('es-ES'),
+						valor: d.valor.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
 						unidad
 					};
 				}
@@ -349,7 +349,7 @@
 				x: 0,
 				y: 0,
 				fecha: formatoFecha.format(lastDataPoint.fecha),
-				valor: lastDataPoint.valor.toLocaleString('es-ES'),
+				valor: lastDataPoint.valor.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
 				unidad
 			};
 		}

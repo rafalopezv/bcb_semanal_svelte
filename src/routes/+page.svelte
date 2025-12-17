@@ -422,13 +422,13 @@
 						<!-- Tooltip at title level -->
 						{#if chartTooltip.visible}
 							<div class="pointer-events-none mr-8 md:mr-20 text-right">
-								<div class="text-[10px] md:text-xs font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60 mb-0.5 md:mb-1">
+								<div class="text-xs md:text-base font-normal text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60 mb-0.5 md:mb-1">
 									{chartTooltip.fecha}
 								</div>
-								<div class="text-base md:text-2xl font-semibold text-light-accent-bronze dark:text-dark-accent-bronze mb-0.5 md:mb-1">
+								<div class="text-lg md:text-3xl font-bold text-light-accent-bronze dark:text-dark-accent-bronze mb-0.5 md:mb-1">
 									{chartTooltip.valor}
 								</div>
-								<div class="text-xs md:text-sm font-medium text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60">
+								<div class="text-sm md:text-lg font-normal text-light-titulo dark:text-dark-titulo opacity-70 dark:opacity-60">
 									{chartTooltip.unidad}
 								</div>
 							</div>
