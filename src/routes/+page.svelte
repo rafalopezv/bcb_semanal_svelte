@@ -414,29 +414,15 @@
 					</div>
 					<!-- Footer - inside chart section -->
 					<footer class="text-center text-sm text-gray-600 dark:text-gray-400 pt-4">
-					<p class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-						<span>
-							Datos del
-							<a
-								href="https://www.bcb.gob.bo/?q=estad-sticas-semanales"
-								target="_blank"
-								rel="noopener noreferrer"
-								class="underline decoration-dotted underline-offset-2 decoration-1 hover:text-light-accent dark:hover:text-dark-accent"
-							>
-								Banco Central de Bolivia
-							</a>
-						</span>
-						<span class="hidden sm:inline text-gray-400 dark:text-gray-600">•</span>
-						<span>
-							Última actualización: {lastDataDate
-								? lastDataDate.toLocaleDateString('es-ES', {
-										year: 'numeric',
-										month: 'long',
-										day: 'numeric',
-										timeZone: 'UTC'
-									})
-								: '...'}
-						</span>
+					<p>
+						Última actualización: {lastDataDate
+							? lastDataDate.toLocaleDateString('es-ES', {
+									year: 'numeric',
+									month: 'long',
+									day: 'numeric',
+									timeZone: 'UTC'
+								})
+							: '...'}
 					</p>
 				</footer>
 			</section>

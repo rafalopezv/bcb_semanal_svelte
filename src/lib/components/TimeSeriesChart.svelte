@@ -6,6 +6,7 @@
 
 	let chartContainer;
 	let isAnimating = $state(false);
+	let isFirstRender = true;
 
 	const colors = $derived(
 		isDark
@@ -67,7 +68,7 @@
 
 		const margin = {
 			top: showTitle ? 80 : 20,
-			right: isMobile ? 50 : 70,
+			right: isMobile ? 60 : 80,
 			bottom: isMobile ? 30 : 40,
 			left: isMobile ? 10 : 30
 		};
@@ -95,7 +96,8 @@
 			.attr('class', 'rounded')
 			.style('background-color', colors.background);
 
-		const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+		const g = svg.append('g')
+		.attr('transform', `translate(${margin.left},${margin.top})`);
 
 		// Multi-line title inside chart (only if showTitle is true)
 		if (showTitle) {
@@ -151,7 +153,7 @@
 		// Full area (will be hidden on hover)
 		const fullArea = g
 			.append('path')
-			.datum(serie)
+			.datum(isFirstRender ? serie.slice(0, 1) : serie)
 			.attr('class', 'full-area')
 			.attr('fill', colors.fill)
 			.attr('fill-opacity', 0.5)
@@ -183,7 +185,7 @@
 		// Full line (will be hidden on hover)
 		const fullLine = g
 			.append('path')
-			.datum(serie)
+			.datum(isFirstRender ? serie.slice(0, 1) : serie)
 			.attr('class', 'full-line')
 			.attr('fill', 'none')
 			.attr('stroke', colors.line)
@@ -201,6 +203,26 @@
 				.attr('fill', colors.focus_primary)
 				.attr('stroke', colors.focus_stroke)
 				.attr('stroke-width', 2.5);
+		}
+
+		// Animate line and area reveal on FIRST render only - mimic hover effect
+		if (isFirstRender) {
+			let revealIndex = 1;
+			const totalSteps = Math.min(serie.length, 60);
+			const stepSize = serie.length / totalSteps;
+			const frameDuration = 4000 / totalSteps;
+
+			const revealInterval = setInterval(() => {
+				const currentIndex = Math.min(Math.floor(revealIndex), serie.length);
+				const revealData = serie.slice(0, currentIndex);
+				fullArea.datum(revealData).attr('d', area);
+				fullLine.datum(revealData).attr('d', line);
+
+				revealIndex += stepSize;
+				if (currentIndex >= serie.length) {
+					clearInterval(revealInterval);
+				}
+			}, frameDuration);
 		}
 
 		// Hover line - active portion (from start to hover point)
@@ -353,6 +375,9 @@
 				unidad
 			};
 		}
+
+		// Mark that first render is complete
+		isFirstRender = false;
 	}
 
 	// Debounced chart update to prevent too many redraws
