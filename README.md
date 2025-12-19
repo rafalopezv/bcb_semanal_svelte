@@ -2,6 +2,8 @@
 
 Plataforma de visualización de datos del Banco Central de Bolivia construida con SvelteKit, D3.js y Tailwind CSS.
 
+> **Nota importante:** Este repositorio contiene únicamente la interfaz de visualización. Los datos son generados y actualizados automáticamente por el repositorio [mauforonda/bcb_semanal](https://github.com/mauforonda/bcb_semanal/). **Ambos repositorios son esenciales** para el funcionamiento completo del sistema.
+
 ## 🚀 Características
 
 - **Visualizaciones interactivas** con D3.js
@@ -49,15 +51,20 @@ app/
 ├── src/
 │   ├── lib/
 │   │   ├── components/
-│   │   │   └── TimeSeriesChart.svelte  # Componente de gráfico D3
-│   │   └── utils/                      # Utilidades
+│   │   │   ├── TimeSeriesChart.svelte  # Componente de gráfico D3
+│   │   │   ├── ParquetViewer.svelte    # Visor de datos
+│   │   │   └── Sidebar.svelte          # Barra lateral de navegación
+│   │   └── stores/
+│   │       └── theme.js                # Store de tema
 │   ├── routes/
 │   │   ├── +layout.svelte              # Layout principal con theme toggle
-│   │   └── +page.svelte                # Página principal
+│   │   ├── +layout.js                  # Layout config
+│   │   ├── +page.svelte                # Página principal
+│   │   └── +page.js                    # Server-side data loading
 │   ├── app.css                         # Estilos globales con Tailwind
 │   └── app.html                        # Template HTML
 ├── static/
-│   └── datos.csv                       # Datos del BCB
+│   └── logo.png                        # Logo del BCB
 ├── package.json
 ├── svelte.config.js
 ├── tailwind.config.js
@@ -88,7 +95,17 @@ El proyecto incluye soporte completo para tema claro y oscuro:
 
 ## 📊 Datos
 
-Los datos se cargan desde `/static/datos.csv` que contiene:
+Los datos se cargan automáticamente desde el repositorio [mauforonda/bcb_semanal](https://github.com/mauforonda/bcb_semanal/), el cual genera y actualiza el archivo CSV con las estadísticas semanales del Banco Central de Bolivia.
+
+### Fuente de Datos
+- **Repositorio de datos**: https://github.com/mauforonda/bcb_semanal/
+- **CSV en vivo**: https://raw.githubusercontent.com/mauforonda/bcb_semanal/refs/heads/main/datos.csv
+
+**Ambos repositorios son importantes:**
+- **Este repositorio**: Interfaz de visualización (frontend)
+- **bcb_semanal**: Generación y actualización de datos (backend)
+
+### Estructura del CSV
 - `unidad` - Unidad de medida
 - `categoria` - Categoría del indicador
 - `variable` - Nombre de la variable
@@ -140,18 +157,20 @@ npm run build
 npx serve build
 ```
 
-## 🔄 Conexión con API en Vivo
+## 🔄 Carga de Datos
 
-Para conectar con APIs en tiempo real, modifica `src/routes/+page.svelte`:
+Los datos se cargan automáticamente en cada visita desde el repositorio GitHub en `src/routes/+page.js`:
 
 ```javascript
-// En lugar de cargar desde CSV estático
-const csvData = await d3.csv('/datos.csv', ...);
-
-// Usa fetch a tu API
-const response = await fetch('https://api.tudominio.gov.bo/bcb/data');
-const apiData = await response.json();
+export async function load({ fetch }) {
+  const response = await fetch('https://raw.githubusercontent.com/mauforonda/bcb_semanal/refs/heads/main/datos.csv');
+  const csvText = await response.text();
+  const csvData = d3.csvParse(csvText, ...);
+  return { csvData };
+}
 ```
+
+Esto garantiza que siempre se muestren los datos más recientes generados por el repositorio [mauforonda/bcb_semanal](https://github.com/mauforonda/bcb_semanal/).
 
 ## 🔧 Configuración
 
@@ -180,9 +199,10 @@ El proyecto ya está configurado con:
 
 ## 🎯 Próximos Pasos
 
-1. **Conectar con APIs en tiempo real**
-   - Reemplazar CSV por endpoints REST
-   - Implementar actualización automática (polling o WebSocket)
+1. **Mejorar la integración de datos**
+   - Implementar actualización automática periódica
+   - Agregar indicador de última actualización más visible
+   - Cache inteligente de datos
 
 2. **Expandir visualizaciones**
    - Agregar más tipos de gráficos
@@ -191,8 +211,8 @@ El proyecto ya está configurado con:
 
 3. **Mejorar Performance**
    - Implementar virtual scrolling en tablas
-   - Lazy loading de datos
-   - Service Workers para cache
+   - Service Workers para cache offline
+   - Optimización de renderizado de gráficos
 
 4. **Agregar analíticas**
    - Google Analytics / Plausible
@@ -201,15 +221,21 @@ El proyecto ya está configurado con:
 ## 📝 Notas
 
 - Este es un proyecto **sin TypeScript** por diseño
-- Los datos se actualizan manualmente copiando `datos.csv`
-- Para producción, considera implementar un pipeline de datos automatizado
+- Los datos se cargan automáticamente desde el repositorio [mauforonda/bcb_semanal](https://github.com/mauforonda/bcb_semanal/)
+- La actualización de datos es responsabilidad del repositorio de datos (bcb_semanal)
+- Este repositorio solo se encarga de la visualización e interfaz de usuario
 
 ## 🆘 Soporte
 
 Para problemas o preguntas:
+
+**Problemas con la visualización o interfaz:**
 1. Revisar logs del servidor de desarrollo
-2. Verificar que `datos.csv` esté en `/static`
-3. Limpiar cache: `rm -rf .svelte-kit node_modules && npm install`
+2. Limpiar cache: `rm -rf .svelte-kit node_modules && npm install`
+3. Reportar issues en este repositorio
+
+**Problemas con los datos:**
+- Reportar en el repositorio de datos: https://github.com/mauforonda/bcb_semanal/issues
 
 ## 📄 Licencia
 
