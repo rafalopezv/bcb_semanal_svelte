@@ -6,6 +6,9 @@
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import { themeStore } from '$lib/stores/theme.js';
 
+	// Receive data from the load function
+	let { data: pageData } = $props();
+
 	let data = $state([]);
 	let dataIndex = $state({}); // NEW: Pre-indexed data for instant lookup
 	let variables = $state({});
@@ -34,18 +37,9 @@
 
 	// Detect dark mode
 	onMount(async () => {
-		// Load data
+		// Load data from server-side load function
 		try {
-			const csvData = await d3.csv('/datos.csv', (d) => ({
-				unidad: d.unidad,
-				categoria: d.categoria,
-				variable: d.variable,
-				subvariable: d.subvariable,
-				fecha: d.fecha,
-				valor: +d.valor
-			}));
-
-			data = csvData;
+			data = pageData.csvData;
 
 			// Build index: variable -> subvariable -> data[] for instant lookups
 			const index = {};
@@ -180,8 +174,8 @@
 	// Download functions
 	function downloadSeriesTiempo() {
 		const a = document.createElement('a');
-		a.href = '/serie_tiempo.zip';
-		a.download = 'serie_tiempo.zip';
+		a.href = 'https://github.com/mauforonda/bcb_semanal/releases/download/v0.0.3/datapackage-release.zip';
+		a.download = 'datapackage-release.zip';
 		a.click();
 		showDownloadMenu = false;
 	}
